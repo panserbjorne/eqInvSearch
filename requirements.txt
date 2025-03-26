@@ -1,0 +1,5 @@
+natsort>=8.4.0
+platformdirs>=4.3.7
+PyQtDarkTheme-fork>=2.3.4
+PySide6_Essentials>=6.8.2.1
+PyYAML>=6.0.2
