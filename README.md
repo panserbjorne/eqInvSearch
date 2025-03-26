@@ -1,0 +1,2 @@
+# eqInvSearch
+EQ Inventory Searcher
