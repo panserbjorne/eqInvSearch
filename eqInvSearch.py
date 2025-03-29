@@ -29,10 +29,12 @@ from mainWindow import Ui_MainWindow
 SETTINGS_FILE = 'settings.yml'
 VERSION = "0.1.0"
 
+
 class IndentDumper(yaml.Dumper):
     '''Custom YAML Dumper that provides indentation'''
     def increase_indent(self, flow=False, indentless=False):
         return super().increase_indent(flow, False)
+
 
 class MainWindow(QMainWindow):
     '''Main QT Window'''
@@ -41,7 +43,7 @@ class MainWindow(QMainWindow):
         '''Load config from file'''
 
         if os.path.isfile(self.config_file_path):
-            with open (self.config_file_path, 'r', encoding='utf-8') as yml_file:
+            with open(self.config_file_path, 'r', encoding='utf-8') as yml_file:
                 self.config = yaml.safe_load(yml_file)
         if not self.config:
             self.config = {}
@@ -58,7 +60,7 @@ class MainWindow(QMainWindow):
         # Abort if no directories have been provided
         if not self.config['invDirectories']:
             self.inventory_files = []
-        new_inventory_files = [] # For comparison
+        new_inventory_files = []  # For comparison
 
         # Find inventory files each EQ directory
         for inv_directory in self.config['invDirectories']:
@@ -75,7 +77,7 @@ class MainWindow(QMainWindow):
     def load_inventories(self):
         '''Load items from inventory files'''
 
-        previous_selected_char = self.current_selected_char # For comparsion
+        previous_selected_char = self.current_selected_char  # For comparsion
         self.ui.char_select_combo.clear()
 
         self.inventories_last_loaded = time.time()
@@ -108,7 +110,7 @@ class MainWindow(QMainWindow):
                 item_id = item.group('itemID')
                 item_count = int(item.group('itemCount'))
 
-                if item_id == '0': # Item is either coin or an empty slot
+                if item_id == '0':  # Item is either coin or an empty slot
                     if item_count == 0:
                         continue
                     elif item_location == 'General-Coin' or item_location == 'Bank-Coin':
@@ -154,7 +156,7 @@ class MainWindow(QMainWindow):
     def find_inv_items(self):
         '''Searches the stored inventory for search box contents'''
 
-        self.ui.found_items_tree.clear() # Remove the current search results
+        self.ui.found_items_tree.clear()  # Remove the current search results
 
         search_string = self.ui.search_box_edit.displayText()
 
@@ -164,8 +166,8 @@ class MainWindow(QMainWindow):
 
         self.current_selected_char = self.ui.char_select_combo.currentText()
 
-        found_items = [] # To hold matching items
-        search_string = search_string.replace("'","['`]") # EQ sometimes uses `, othertimes '
+        found_items = []  # To hold matching items
+        search_string = search_string.replace("'", "['`]")  # EQ sometimes uses `, othertimes '
 
         characters_with_matches = ['All']
 
@@ -174,7 +176,7 @@ class MainWindow(QMainWindow):
             item_name = item['name']
             try:
                 item_matched = re.search(fr"{search_string}", item_name, re.IGNORECASE)
-            except re.PatternError: # Discard invalid regex patterns
+            except re.PatternError:  # Discard invalid regex patterns
                 item_matched = False
 
             #  Can either match on item or item ID
@@ -190,8 +192,8 @@ class MainWindow(QMainWindow):
                 if self.current_selected_char == 'All':
                     total_count = str(item['totalCount'])
                     found_item = QTreeWidgetItem([item_name + item_id_str, total_count])
-                    found_item.setForeground(0,QColor(255,175,255))
-                    found_item.setForeground(1,QColor(255,175,255))
+                    found_item.setForeground(0, QColor(255, 175, 255))
+                    found_item.setForeground(1, QColor(255, 175, 255))
                     found_items_updated = True
                 for character, character_info in item['characters'].items():
                     if character not in characters_with_matches:
@@ -200,32 +202,32 @@ class MainWindow(QMainWindow):
                     # When searching all characters, create a character row
                     if self.current_selected_char == 'All':
                         found_char = QTreeWidgetItem([character, character_count])
-                        found_char.setTextAlignment(1,Qt.AlignmentFlag.AlignRight)
-                        found_char.setForeground(0,QColor(100,200,255))
-                        found_char.setForeground(1,QColor(100,200,255))
+                        found_char.setTextAlignment(1, Qt.AlignmentFlag.AlignRight)
+                        found_char.setForeground(0, QColor(100, 200, 255))
+                        found_char.setForeground(1, QColor(100, 200, 255))
                         found_item.addChild(found_char)
                     # When searching a single character, create a parent row for the item with the character's total
                     elif character == self.current_selected_char:
                         found_item = QTreeWidgetItem([item_name + item_id_str, character_count])
-                        found_item.setForeground(0,QColor(255,175,255))
-                        found_item.setForeground(1,QColor(255,175,255))
+                        found_item.setForeground(0, QColor(255, 175, 255))
+                        found_item.setForeground(1, QColor(255, 175, 255))
                         found_items_updated = True
                     else:
                         continue
                     location_row_odd = True
                     for location, location_count in character_info['locations'].items():
-                        location_friendly_name = location.replace('-Slot',' - ')
+                        location_friendly_name = location.replace('-Slot', ' - ')
                         location_friendly_name = re.sub(r'^([a-zA-Z]+)(\d+)', r'\1\t\2', location_friendly_name)
-                        #foundItemsTree.insert(locationParent, 'end', text=locationFriendlyName, values=(str(locationCount)), tags=locationRowTag) # Add item locations
+
                         found_location = QTreeWidgetItem([location_friendly_name, str(location_count)])
-                        found_location.setTextAlignment(1,Qt.AlignmentFlag.AlignRight)
+                        found_location.setTextAlignment(1, Qt.AlignmentFlag.AlignRight)
                         if location_row_odd is True:
-                            found_location.setBackground(0,QColor(50,50,50))
-                            found_location.setBackground(1,QColor(50,50,50))
+                            found_location.setBackground(0, QColor(50, 50, 50))
+                            found_location.setBackground(1, QColor(50, 50, 50))
                             location_row_odd = False
                         else:
-                            found_location.setBackground(0,QColor(70,70,70))
-                            found_location.setBackground(1,QColor(70,70,70))
+                            found_location.setBackground(0, QColor(70, 70, 70))
+                            found_location.setBackground(1, QColor(70, 70, 70))
                             location_row_odd = True
                         if self.current_selected_char == "All":
                             # Searching all characters, use the character row as the parent
@@ -235,7 +237,7 @@ class MainWindow(QMainWindow):
                             found_item.addChild(found_location)
 
                 if found_items_updated is True:
-                    found_item.setTextAlignment(1,Qt.AlignmentFlag.AlignRight)
+                    found_item.setTextAlignment(1, Qt.AlignmentFlag.AlignRight)
                     found_items.append(found_item)
 
         if len(found_items) == 0:
@@ -247,10 +249,9 @@ class MainWindow(QMainWindow):
         for index in range(self.ui.char_select_combo.count()):
             character = self.ui.char_select_combo.itemText(index)
             if character not in characters_with_matches:
-                background_color = QColor(240,120,120)
+                background_color = QColor(240, 120, 120)
             else:
-                #background_color = None
-                background_color = QColor(120,240,120)
+                background_color = QColor(120, 240, 120)
             self.ui.char_select_combo.setItemData(index, background_color, Qt.ItemDataRole.ForegroundRole)
         return
 
@@ -270,7 +271,7 @@ class MainWindow(QMainWindow):
                 existing_invdirs_count = self.ui.settings_invdirs_tree.topLevelItemCount()
                 # Abort if path already exists
                 for index in range(existing_invdirs_count):
-                    existing_invdir = self.ui.settings_invdirs_tree.topLevelItem(index).data(0,0)
+                    existing_invdir = self.ui.settings_invdirs_tree.topLevelItem(index).data(0, 0)
                     if existing_invdir == new_invdir:
                         return
                 invdir_item = QTreeWidgetItem([new_invdir])
@@ -297,7 +298,7 @@ class MainWindow(QMainWindow):
         new_invdirs_count = self.ui.settings_invdirs_tree.topLevelItemCount()
         self.config['invDirectories'] = []
         for index in range(new_invdirs_count):
-            new_invdir = self.ui.settings_invdirs_tree.topLevelItem(index).data(0,0)
+            new_invdir = self.ui.settings_invdirs_tree.topLevelItem(index).data(0, 0)
             self.config['invDirectories'].append(new_invdir)
         # Save Show Item IDs checkbox
         self.config['showItemIDs'] = self.ui.settings_showids_check.isChecked()
@@ -311,7 +312,7 @@ class MainWindow(QMainWindow):
         # Save settings to file
         if not os.path.isdir(self.config_dir):
             os.makedirs(self.config_dir)
-        with open (self.config_file_path, 'w', encoding='utf-8') as yml_file:
+        with open(self.config_file_path, 'w', encoding='utf-8') as yml_file:
             yaml.dump(self.config, stream=yml_file, Dumper=IndentDumper)
 
         # Re-load inventory and re-run search
@@ -339,19 +340,24 @@ class MainWindow(QMainWindow):
         if self.ui.tabs.currentIndex() == tab_clicked_index:
             return
         tab_clicked = self.ui.tabs.tabText(tab_clicked_index)
-        if tab_clicked == 'Settings':
+        if tab_clicked != 'Settings' and self.settings_changed:
+            save_prompt = QMessageBox(self)
+            save_prompt.setWindowTitle('EQ Inventory Searcher')
+            save_prompt.setText('Save updated settings?')
+            save_prompt.setStandardButtons(QMessageBox.Save | QMessageBox.Discard)
+            save_prompt_resp = save_prompt.exec()
+            if save_prompt_resp == 2048:
+                self.settings_save()
+            else:
+                self.settings_changed = False
+
+    def tab_changed(self, new_active_tab_index):
+        '''Runs tab-specific functions when active tab is changed'''
+        new_active_tab = self.ui.tabs.tabText(new_active_tab_index)
+        if new_active_tab == 'Search':
+            self.ui.search_box_edit.setFocus()
+        if new_active_tab == 'Settings':
             self.update_settings_tab()
-        else:
-            if self.settings_changed is True:
-                save_prompt = QMessageBox(self)
-                save_prompt.setWindowTitle('EQ Inventory Searcher')
-                save_prompt.setText('Save updated settings?')
-                save_prompt.setStandardButtons(QMessageBox.Save | QMessageBox.Discard)
-                save_prompt_resp = save_prompt.exec()
-                if save_prompt_resp == 2048:
-                    self.settings_save()
-                else:
-                    self.settings_changed = False
 
     def char_select_combo_move(self, direction):
         total_items = self.ui.char_select_combo.count()
@@ -371,12 +377,18 @@ class MainWindow(QMainWindow):
         self.ui.char_select_combo.setCurrentIndex(new_index)
         return
 
-
-    def tab_changed(self, new_active_tab_index):
-        '''Runs tab-specific functions when active tab is changed'''
-        new_active_tab = self.ui.tabs.tabText(new_active_tab_index)
-        if new_active_tab == 'Search':
-            self.ui.search_box_edit.setFocus()
+    def watch_inventory_modifications(self):
+        '''Checks to see if inventory files have been modified'''
+        self.get_inventory_files()
+        found_modified_inventory_files = False
+        for inventory_file in self.inventory_files:
+            file_path = os.path.join(inventory_file['dir'], inventory_file['file'])
+            last_modified = os.stat(file_path).st_mtime
+            if last_modified > self.inventories_last_loaded:
+                found_modified_inventory_files = True
+                break
+        if found_modified_inventory_files is True:
+            self.load_inventories()
 
     def __init__(self):
 
@@ -391,8 +403,6 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-        # self.setWindowTitle('EQ Inventory Searcher')
-        # self.resize(470,600)
         window_icon = QIcon()
         if getattr(sys, 'frozen', False):
             application_path = sys._MEIPASS
@@ -403,8 +413,9 @@ class MainWindow(QMainWindow):
         window_icon.addFile(icon_path)
         self.setWindowIcon(window_icon)
 
-        self.ui.found_items_tree.setColumnWidth(0,350)
-        self.ui.found_items_tree.setColumnWidth(1,55)
+        self.ui.found_items_tree.setColumnWidth(0, 350)
+        self.ui.found_items_tree.setColumnWidth(1, 55)
+        self.ui.about_version_label.setText(f'v{VERSION}')
 
         self.check_inventory_updates_timer = QTimer(self)
         self.check_inventory_updates_timer.setInterval(1000)
@@ -414,9 +425,9 @@ class MainWindow(QMainWindow):
         self.ui.tabs.currentChanged.connect(self.tab_changed)
 
         self.ui.search_box_edit.textChanged.connect(self.find_inv_items)
-        QShortcut( 'F2', self.ui.search_box_edit ).activated.connect( lambda : self.char_select_combo_move('home') )
-        QShortcut( 'Up', self.ui.search_box_edit ).activated.connect( lambda : self.char_select_combo_move('up') )
-        QShortcut( 'Down', self.ui.search_box_edit ).activated.connect( lambda : self.char_select_combo_move('down') )
+        QShortcut('F2', self.ui.search_box_edit).activated.connect(lambda: self.char_select_combo_move('home'))
+        QShortcut('Up', self.ui.search_box_edit).activated.connect(lambda: self.char_select_combo_move('up'))
+        QShortcut('Down', self.ui.search_box_edit).activated.connect(lambda: self.char_select_combo_move('down'))
         self.ui.char_select_combo.currentTextChanged.connect(self.find_inv_items)
 
         self.ui.settings_invdirs_add_btn.pressed.connect(self.invdirs_add)
@@ -427,8 +438,6 @@ class MainWindow(QMainWindow):
 
         self.check_inventory_updates_timer.timeout.connect(self.watch_inventory_modifications)
         self.check_inventory_updates_timer.start()
-
-        self.ui.about_version_label.setText(f'v{VERSION}')
 
         # Load inital config
         self.config_dir = platformdirs.user_config_dir('eqInvSearch', appauthor=False)
@@ -443,18 +452,6 @@ class MainWindow(QMainWindow):
         self.show()
         self.ui.search_box_edit.setFocus()
 
-    def watch_inventory_modifications(self):
-        '''Checks to see if inventory files have been modified'''
-        self.get_inventory_files()
-        found_modified_inventory_files = False
-        for inventory_file in self.inventory_files:
-            file_path = os.path.join(inventory_file['dir'],inventory_file['file'])
-            last_modified = os.stat(file_path).st_mtime
-            if last_modified > self.inventories_last_loaded:
-                found_modified_inventory_files = True
-                break
-        if found_modified_inventory_files is True:
-            self.load_inventories()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
