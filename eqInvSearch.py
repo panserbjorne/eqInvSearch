@@ -86,6 +86,21 @@ class MainWindow(QMainWindow):
         character_list = []
         self.inventory = {}
 
+        # Prompt for inventory file if none are found
+        if len(self.inventory_files) == 0:
+            add_invdirs_prompt = QMessageBox(self)
+            add_invdirs_prompt.setWindowTitle('EQ Inventory Searcher')
+            add_invdirs_prompt.setText('Select an Inventory file from your EverQuest directory.')
+            add_invdirs_prompt.setStandardButtons(QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel)
+            add_invdirs_prompt_resp = add_invdirs_prompt.exec()
+            if add_invdirs_prompt_resp == 1024:
+                self.invdirs_add()
+                self.settings_save()
+                self.ui.tabs.setCurrentWidget(self.ui.search_tab)
+            else:
+                self.ui.tabs.setCurrentWidget(self.ui.settings_tab)
+                self.ui.tabs.setTabEnabled(0, False)
+
         if len(self.inventory_files) == 0:
             self.ui.tabs.setTabEnabled(0, False)
             self.ui.tabs.setCurrentWidget(self.ui.settings_tab)
@@ -447,9 +462,9 @@ class MainWindow(QMainWindow):
         # Prepare for first search
         self.update_settings_tab()
         self.get_inventory_files()
-        self.load_inventories()
 
         self.show()
+        self.load_inventories()
         self.ui.search_box_edit.setFocus()
 
 
