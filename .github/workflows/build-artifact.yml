@@ -53,12 +53,6 @@ jobs:
           git log --pretty=format:"- %s" $LAST_TAG..HEAD >> $CHANGELOG
           echo filename=$CHANGELOG >> $GITHUB_OUTPUT
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: eqInvSearch
-          path: eqInvSearch.exe
-
       - name: Create the github release tag and upload artifacts
         uses: ncipollo/release-action@v1
         with:
