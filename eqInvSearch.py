@@ -27,7 +27,7 @@ import yaml
 from mainWindow import Ui_MainWindow
 
 SETTINGS_FILE = 'settings.yml'
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 
 
 class IndentDumper(yaml.Dumper):
