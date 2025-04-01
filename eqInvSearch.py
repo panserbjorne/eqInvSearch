@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
     QFileDialog,
     QMessageBox,
     QTreeWidgetItem,
+    QHeaderView,
     QMainWindow
 )
 import qdarktheme
@@ -138,8 +139,8 @@ class MainWindow(QMainWindow):
                 inventory_text = file.read()
 
             character_known_item_ids = []
-            find_re = r'(?P<itemLocation>[\w-]+)\t(?P<itemName>.+)\t(?P<itemID>[\d]+)\t(?P<itemCount>[\d]+)\t(?P<itemSlots>[\d]+)'
-            for item in re.finditer(find_re, inventory_text):
+            find_items_re = r'(?P<itemLocation>[\w-]+)\t(?P<itemName>.+)\t(?P<itemID>[\d]+)\t(?P<itemCount>[\d]+)\t(?P<itemSlots>[\d]+)'
+            for item in re.finditer(find_items_re, inventory_text):
                 item_location = item.group('itemLocation')
                 item_name = item.group('itemName')
                 item_id = item.group('itemID')
@@ -270,10 +271,21 @@ class MainWindow(QMainWindow):
                         continue
                     location_row_odd = True
                     for location, location_count in character_info['locations'].items():
-                        location_friendly_name = location.replace('-Slot', ' - ')
-                        location_friendly_name = re.sub(r'^([a-zA-Z]+)(\d+)', r'\1\t\2', location_friendly_name)
-
+                        find_location_re = r'^(?P<base_location>[a-zA-Z]+)(?P<base_slot>\d*)-*(?P<sub_location>[a-zA-Z]*)(?P<sub_slot>\d*)'
+                        friendly_location_groups = re.finditer(find_location_re, location)
+                        if not friendly_location_groups:
+                            break
+                        for friendly_location in friendly_location_groups:
+                            # Recreate the location line with padded values
+                            location_friendly_name = friendly_location.group('base_location').ljust(12)
+                            if friendly_location.group('base_slot'):
+                                location_friendly_name += friendly_location.group('base_slot').rjust(2)
+                            if friendly_location.group('sub_location'):
+                                location_friendly_name += ', '
+                            if friendly_location.group('sub_slot'):
+                                location_friendly_name += friendly_location.group('sub_slot').rjust(2)
                         found_location = QTreeWidgetItem([location_friendly_name, str(location_count)])
+                        found_location.setFont(0, self.locationRowFont)
                         found_location.setTextAlignment(1, Qt.AlignmentFlag.AlignRight)
                         if location_row_odd is True:
                             found_location.setBackground(0, QColor(50, 50, 50))
@@ -597,8 +609,10 @@ class MainWindow(QMainWindow):
         window_icon.addFile(icon_path)
         self.setWindowIcon(window_icon)
 
-        self.ui.found_items_tree.setColumnWidth(0, 350)
-        self.ui.found_items_tree.setColumnWidth(1, 55)
+        self.ui.found_items_tree.setColumnWidth(1, 85)
+        # Only allow the first column to be stretched
+        self.ui.found_items_tree.header().setStretchLastSection(False)
+        self.ui.found_items_tree.header().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         self.ui.about_version_label.setText(f'v{VERSION}')
 
         self.check_inventory_updates_timer = QTimer(self)
@@ -630,6 +644,10 @@ class MainWindow(QMainWindow):
         self.check_inventory_updates_timer.timeout.connect(self.watch_inventory_modifications)
         self.check_inventory_updates_timer.start()
 
+        # The location row uses whitespace to align values, so prepare a monospace font
+        self.locationRowFont = QFont('Lucida Sans Typewriter', 11)
+        self.locationRowFont.setStyleHint(QFont.StyleHint.TypeWriter)
+
         # Load inital config
         self.config_dir = platformdirs.user_config_dir('eqInvSearch', appauthor=False)
         self.config_file_path = os.path.join(self.config_dir, SETTINGS_FILE)
@@ -647,7 +665,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     qdarktheme.setup_theme()
-    defaultFont = QFont('Calibre', 12)
+    defaultFont = QFont('Calibri', 13)
     app.setFont(defaultFont)
 
     window = MainWindow()

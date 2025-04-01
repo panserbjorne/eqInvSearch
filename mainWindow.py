@@ -35,6 +35,7 @@ class Ui_MainWindow(object):
         self.base_layout.setContentsMargins(0, 0, 0, 0)
         self.tabs = QTabWidget(self.base_widget)
         self.tabs.setObjectName(u"tabs")
+        self.tabs.setStyleSheet(u"QTabWidget::tab-bar { alignment: center; }")
         self.search_tab = QWidget()
         self.search_tab.setObjectName(u"search_tab")
         self.search_layout = QGridLayout(self.search_tab)
@@ -65,7 +66,9 @@ class Ui_MainWindow(object):
         __qtreewidgetitem.setTextAlignment(1, Qt.AlignCenter);
         self.found_items_tree.setHeaderItem(__qtreewidgetitem)
         self.found_items_tree.setObjectName(u"found_items_tree")
+        self.found_items_tree.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
         self.found_items_tree.setColumnCount(2)
+        self.found_items_tree.header().setStretchLastSection(True)
 
         self.search_layout.addWidget(self.found_items_tree, 2, 0, 1, 2)
 
@@ -186,7 +189,7 @@ class Ui_MainWindow(object):
         self.settings_toolbox.addItem(self.settings_general_page, u"General")
         self.settings_accounts_page = QWidget()
         self.settings_accounts_page.setObjectName(u"settings_accounts_page")
-        self.settings_accounts_page.setGeometry(QRect(0, 0, 455, 520))
+        self.settings_accounts_page.setGeometry(QRect(0, 0, 224, 354))
         self.settings_accounts_layout = QGridLayout(self.settings_accounts_page)
         self.settings_accounts_layout.setSpacing(6)
         self.settings_accounts_layout.setObjectName(u"settings_accounts_layout")
