@@ -189,7 +189,7 @@ class Ui_MainWindow(object):
         self.settings_toolbox.addItem(self.settings_general_page, u"General")
         self.settings_accounts_page = QWidget()
         self.settings_accounts_page.setObjectName(u"settings_accounts_page")
-        self.settings_accounts_page.setGeometry(QRect(0, 0, 224, 354))
+        self.settings_accounts_page.setGeometry(QRect(0, 0, 455, 520))
         self.settings_accounts_layout = QGridLayout(self.settings_accounts_page)
         self.settings_accounts_layout.setSpacing(6)
         self.settings_accounts_layout.setObjectName(u"settings_accounts_layout")

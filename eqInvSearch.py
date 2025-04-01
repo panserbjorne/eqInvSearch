@@ -645,7 +645,7 @@ class MainWindow(QMainWindow):
         self.check_inventory_updates_timer.start()
 
         # The location row uses whitespace to align values, so prepare a monospace font
-        self.locationRowFont = QFont('Lucida Sans Typewriter', 11)
+        self.locationRowFont = QFont('Consolas,Lucida Sans Typewriter', 14)
         self.locationRowFont.setStyleHint(QFont.StyleHint.TypeWriter)
 
         # Load inital config
@@ -665,7 +665,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     qdarktheme.setup_theme()
-    defaultFont = QFont('Calibri', 13)
+    defaultFont = QFont('Calibri', 14)
     app.setFont(defaultFont)
 
     window = MainWindow()
