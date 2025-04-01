@@ -353,11 +353,11 @@ class MainWindow(QMainWindow):
     def sharedaccount_del(self):
         '''Removes a parent level account from the Shared Accounts Tree'''
         account_item = self.ui.settings_sharedaccounts_tree.currentItem()
-        if account_item.parent() is None: # Make sure an account is selected and not a child character
-                account_index = self.ui.settings_sharedaccounts_tree.selectedIndexes()
-                account_row = account_index[0].row()
-                self.ui.settings_sharedaccounts_tree.takeTopLevelItem(account_row)
-                self.mark_settings_changed()
+        if account_item.parent() is None:  # Make sure an account is selected and not a child character
+            account_index = self.ui.settings_sharedaccounts_tree.selectedIndexes()
+            account_row = account_index[0].row()
+            self.ui.settings_sharedaccounts_tree.takeTopLevelItem(account_row)
+            self.mark_settings_changed()
 
     def sharedchar_add(self):
         '''Removes a character from the Individual Characters List and attaches it to an account in the Shared Accounts Tree as a child'''
@@ -434,11 +434,11 @@ class MainWindow(QMainWindow):
         self.config['accounts'] = {}
         for parent_index in range(new_sharedaccounts_count):
             new_sharedaccount_item = self.ui.settings_sharedaccounts_tree.topLevelItem(parent_index)
-            new_sharedaccount_name = new_sharedaccount_item.data(0,0)
+            new_sharedaccount_name = new_sharedaccount_item.data(0, 0)
             new_sharedcharacters = []
             for child_index in range(new_sharedaccount_item.childCount()):
                 new_sharedcharacter_item = new_sharedaccount_item.child(child_index)
-                new_sharedcharacter_name = new_sharedcharacter_item.data(0,0)
+                new_sharedcharacter_name = new_sharedcharacter_item.data(0, 0)
                 new_sharedcharacters.append(new_sharedcharacter_name)
             new_sharedcharacters.sort()
             self.config['accounts'][new_sharedaccount_name] = new_sharedcharacters
@@ -503,10 +503,10 @@ class MainWindow(QMainWindow):
                     character_item = QTreeWidgetItem([character])
                     account_item.addChild(character_item)
                     if character in individual_characters:
-                        individual_characters.remove(character) # Remove this account from the individual characters list
+                        individual_characters.remove(character)  # Remove this account from the individual characters list
                 self.ui.settings_sharedaccounts_tree.addTopLevelItem(account_item)
             self.ui.settings_sharedaccounts_tree.expandAll()
-        
+
         # Update the Individual Characters list
         if len(individual_characters) > 0:
             for character in individual_characters:
@@ -638,10 +638,8 @@ class MainWindow(QMainWindow):
         # Prepare for first search
         self.get_inventory_files()
         self.load_inventories()
-        #self.update_settings_tab()
 
         self.show()
-        
         self.ui.search_box_edit.setFocus()
 
 
