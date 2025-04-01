@@ -1,6 +1,18 @@
-name: Compile to Artifact
+name: Compile & Release
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release Version'
+        required: true
+        type: string
+      release_notes:
+        description: 'Summary description prepended to changelog'
+        required: true
+        type: string
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -28,8 +40,25 @@ jobs:
         run: |
           python -m nuitka --assume-yes-for-downloads eqInvSearch.py
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Create a changelog since the last release tag
+        id: changelog
+        shell: bash
+        run: |
+          CHANGELOG="${{ github.workspace }}-changelog.txt"
+          LAST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+          echo "# Release notes" > $CHANGELOG
+          echo ${{ github.event.inputs.release_notes }} >> $CHANGELOG
+          echo ""
+          echo "# Changes since $LAST_TAG" >> $CHANGELOG
+          git log --pretty=format:"- %s" $LAST_TAG..HEAD >> $CHANGELOG
+          echo filename=$CHANGELOG >> $GITHUB_OUTPUT
+
+      - name: Create the github release tag and upload artifacts
+        uses: ncipollo/release-action@v1
         with:
-          name: eqInvSearch
-          path: eqInvSearch.exe
+          artifacts: eqInvSearch.exe
+          artifactErrorsFailBuild: true
+          bodyFile:  "${{ steps.changelog.outputs.filename }}"
+          commit: ${{ github.sha }}
+          generateReleaseNotes: true
+          tag: ${{ github.event.inputs.version }}
