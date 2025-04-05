@@ -24,9 +24,9 @@ jobs:
           
           pip install -r requirements.txt
 
-          - name: Package Application with PyInstaller
-          run: |
-            pyinstaller eqInvSearch.spec
+      - name: Package Application with PyInstaller
+        run: |
+          pyinstaller eqInvSearch.spec
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
