@@ -20,16 +20,16 @@ jobs:
         run: >
           python -m pip install --upgrade pip
 
-          pip install nuitka
+          pip install pyinstaller
           
           pip install -r requirements.txt
 
       - name: Package Application with PyInstaller
         run: |
-          python -m nuitka --assume-yes-for-downloads eqInvSearch.py
+          pyinstaller eqInvSearch.spec
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: eqInvSearch
-          path: eqInvSearch.exe
+          path: dist/eqInvSearch.exe
