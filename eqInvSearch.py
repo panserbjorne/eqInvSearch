@@ -28,7 +28,7 @@ import yaml
 from mainWindow import Ui_MainWindow
 
 SETTINGS_FILE = 'settings.yml'
-VERSION = "0.2.0"
+VERSION = "0.3.0"
 
 inventory_file_re = r'^(?P<character>\w+)-Inventory(?:_(?P<server>\w+)(?:\.\w+)?)?.txt$'
 
