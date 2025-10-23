@@ -30,6 +30,7 @@ from mainWindow import Ui_MainWindow
 SETTINGS_FILE = 'settings.yml'
 VERSION = "0.2.0"
 
+inventory_file_re = r'^(?P<character>\w+)-Inventory(?:_(?P<server>\w+)(?:\.\w+)?)?.txt$'
 
 class IndentDumper(yaml.Dumper):
     '''Custom YAML Dumper that provides indentation'''
@@ -58,6 +59,8 @@ class MainWindow(QMainWindow):
             self.config['showItemIDs'] = False
         if 'sortCharacters' not in self.config:
             self.config['sortCharacters'] = False
+        if 'showServerNames' not in self.config:
+            self.config['showServerNames'] = False
 
     def get_inventory_files(self):
         '''Finds inventory files in provided directories'''
@@ -70,8 +73,14 @@ class MainWindow(QMainWindow):
         # Find inventory files each EQ directory
         for inv_directory in self.config['invDirectories']:
             for file in os.listdir(inv_directory):
-                if file.endswith('-Inventory.txt'):
-                    new_inventory_files.append({'dir': inv_directory, 'file': file})
+                fileMatch = re.match(inventory_file_re, file)
+                if fileMatch:
+                    new_inventory_files.append({
+                        'dir': inv_directory,
+                        'file': file,
+                        'character': fileMatch.group('character'),
+                        'server': fileMatch.group('server')
+                    })
 
         # If the known inventory files list has changed, mark them as never loaded
         if self.inventory_files != new_inventory_files:
@@ -112,7 +121,11 @@ class MainWindow(QMainWindow):
         
         # Find the character with the most recent inventory file for each account
         for inventory_file in self.inventory_files:
-            character_name = inventory_file['file'].replace('-Inventory.txt', '')
+            character_name = inventory_file['character']
+            if self.config['showServerNames']:
+                character_server = inventory_file['server']
+                if character_server:
+                    character_name += f' ({character_server})'
             for account in self.config['accounts']:
                 if character_name in self.config['accounts'][account]:
                     # Get the last modified time of the inventory file for comparison
@@ -130,10 +143,15 @@ class MainWindow(QMainWindow):
 
         # Loop through all inventory files and load items
         for inventory_file in self.inventory_files:
-            character_name = inventory_file['file'].replace('-Inventory.txt', '')
-
+            character_name = inventory_file['character']
+            
             if character_name in self.config['ignoredCharacters']:
                 continue
+            
+            if self.config['showServerNames']:
+                character_server = inventory_file['server']
+                if character_server:
+                    character_name += f' ({character_server})'
 
             # SharedBank slots will be skipped if this character's inventory file is not the most recent for the account
             skip_sharedbank = (character_name in skip_sharedbank_characters)
@@ -177,8 +195,8 @@ class MainWindow(QMainWindow):
                 # For SharedBank slots, skip if the character's inventory file is not the most recent for the account
                 if 'SharedBank' in item_location and skip_sharedbank is True:
                     continue
-                
-                # When a character is configured to be in account, use the account's name for SharedBank slots
+               
+                # When a character is configured to be in an account, use the account's name for SharedBank slots
                 if 'SharedBank' in item_location and account_name:
                     item_character = f'{account_name} (Account)'
                 else:
@@ -206,7 +224,18 @@ class MainWindow(QMainWindow):
 
         # Sort the character list alphabetically
         if self.config["sortCharacters"]:
+            # Sort the accounts in front of the characters
+            for item in self.inventory.values():
+                characters = item.get('characters', {})
+                account_characters = {k: v for k, v in characters.items() if "(Account)" in k}
+                other_characters = {k: v for k, v in characters.items() if "(Account)" not in k}
+                sorted_account_characters = dict(sorted(account_characters.items()))
+                # Reconstruct the 'characters' dictionary with (Account) characters first
+                item['characters'] = {**sorted_account_characters, **other_characters}
+
+            # Sort the character List
             self.character_list.sort()
+        
         # Add the All Characters option at the beginning
         self.character_list.insert(0, 'All')
 
@@ -336,7 +365,7 @@ class MainWindow(QMainWindow):
         '''Add an EQ directory via prompt'''
         new_invdir_dialog = QFileDialog(self)
         new_invdir_dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
-        new_invdir_dialog.setNameFilter("Inventories (*-Inventory.txt)")
+        new_invdir_dialog.setNameFilter("Inventories (*-Inventory.txt *-Inventory_*.txt)")
         new_invdir_dialog.setViewMode(QFileDialog.ViewMode.List)
         if new_invdir_dialog.exec():
             selected_inv_file = new_invdir_dialog.selectedFiles()
@@ -452,6 +481,8 @@ class MainWindow(QMainWindow):
 
         self.config['sortCharacters'] = self.ui.settings_sortchars_check.isChecked()
 
+        self.config['showServerNames'] = self.ui.settings_showservernames_check.isChecked()
+
         # Save Shared Accounts Tree
         new_sharedaccounts_count = self.ui.settings_sharedaccounts_tree.topLevelItemCount()
         self.config['accounts'] = {}
@@ -509,6 +540,10 @@ class MainWindow(QMainWindow):
 
         # Update the Sort Characters checkbox
         self.ui.settings_sortchars_check.setChecked(self.config['sortCharacters'])
+
+        # Update the Show Server Names checkbox
+        self.ui.settings_showservernames_check.setChecked(self.config['showServerNames'])
+
         self.settings_changed = False
 
         # Create a list of individual characters
@@ -643,6 +678,7 @@ class MainWindow(QMainWindow):
         self.ui.settings_invdirs_del_btn.pressed.connect(self.invdirs_del)
         self.ui.settings_showids_check.checkStateChanged.connect(self.mark_settings_changed)
         self.ui.settings_sortchars_check.checkStateChanged.connect(self.mark_settings_changed)
+        self.ui.settings_showservernames_check.checkStateChanged.connect(self.mark_settings_changed)
         self.ui.settings_sharedaccounts_tree.itemChanged.connect(self.mark_settings_changed)
         self.ui.settings_sharedaccounts_add_btn.pressed.connect(self.sharedaccount_add)
         self.ui.settings_sharedaccounts_del_btn.pressed.connect(self.sharedaccount_del)

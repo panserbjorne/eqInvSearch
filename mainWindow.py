@@ -100,7 +100,7 @@ class Ui_MainWindow(object):
         self.settings_toolbox.setLineWidth(2)
         self.settings_general_page = QWidget()
         self.settings_general_page.setObjectName(u"settings_general_page")
-        self.settings_general_page.setGeometry(QRect(0, 0, 455, 520))
+        self.settings_general_page.setGeometry(QRect(0, 0, 453, 521))
         self.settings_general_layout = QGridLayout(self.settings_general_page)
         self.settings_general_layout.setObjectName(u"settings_general_layout")
         self.settings_general_layout.setContentsMargins(0, 0, 6, 0)
@@ -112,6 +112,11 @@ class Ui_MainWindow(object):
         self.settings_sortchars_check.setObjectName(u"settings_sortchars_check")
 
         self.settings_general_layout.addWidget(self.settings_sortchars_check, 4, 2, 1, 1)
+
+        self.settings_showservernames_check = QCheckBox(self.settings_general_page)
+        self.settings_showservernames_check.setObjectName(u"settings_showservernames_check")
+
+        self.settings_general_layout.addWidget(self.settings_showservernames_check, 5, 2, 1, 1)
 
         self.settings_invdirs_layout = QGridLayout()
         self.settings_invdirs_layout.setObjectName(u"settings_invdirs_layout")
@@ -189,7 +194,7 @@ class Ui_MainWindow(object):
         self.settings_toolbox.addItem(self.settings_general_page, u"General")
         self.settings_accounts_page = QWidget()
         self.settings_accounts_page.setObjectName(u"settings_accounts_page")
-        self.settings_accounts_page.setGeometry(QRect(0, 0, 455, 520))
+        self.settings_accounts_page.setGeometry(QRect(0, 0, 224, 330))
         self.settings_accounts_layout = QGridLayout(self.settings_accounts_page)
         self.settings_accounts_layout.setSpacing(6)
         self.settings_accounts_layout.setObjectName(u"settings_accounts_layout")
@@ -371,6 +376,7 @@ class Ui_MainWindow(object):
         self.tabs.setTabText(self.tabs.indexOf(self.search_tab), QCoreApplication.translate("MainWindow", u"Search", None))
         self.settings_save_btn.setText(QCoreApplication.translate("MainWindow", u"Save", None))
         self.settings_sortchars_check.setText(QCoreApplication.translate("MainWindow", u"Sort Characters", None))
+        self.settings_showservernames_check.setText(QCoreApplication.translate("MainWindow", u"Show Server Names", None))
         self.settings_invdirs_add_btn.setText("")
         self.settings_invdirs_del_btn.setText("")
         self.settings_invdirs_label.setText(QCoreApplication.translate("MainWindow", u"Directories containing inventory files:", None))
